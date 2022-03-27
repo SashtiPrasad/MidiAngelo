@@ -1,0 +1,19 @@
+/* IE 7 hacks */
+
+/* LINK BUTTON ------------------------------------------------------------*/
+
+.link-button{
+	position: relative;
+	display: block;
+	float: left;
+}
+	
+.link-button span{
+	position: relative;
+}
+
+
+
+
+
+

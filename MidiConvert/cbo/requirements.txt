@@ -1,0 +1,6 @@
+midi2audio
+music21
+pydub
+pygame
+midiutil
+pillow

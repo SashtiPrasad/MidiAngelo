@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<html>
+<head>
+    {% load static %} <!-- Prepare django to load static files -->
+    <link rel="icon" href={% static "minilogo_transparent.png" %}>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+            <img style="height:150px; width:auto;" src={% static "minilogo_transparent.png" %} href="#">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="btn btn-primary" aria-current="page" href="/home">About Us</a>
+            </li>
+        </ul>
+        <div id="hello_username">
+            
+        </div>
+    </div>
+</nav>
+<div class="container" style="margin-top:15px;">
+    <div class="row justify-content-md-center">
+        <div class="col col-12">
+            <canvas id="mainCanvas" width="16" height="16" style="width:256px;height:256px"></canvas>
+            <br>
+            <select name="colors" id="colors">
+                <option value="black">Black</option>
+                <option value="white">White</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+            </select>
+            <div>
+                <p>Ctrl+Click to select multiple</p>
+                <select multiple id="soundfont_picker" style="min-height: 300px;">
+                
+                </select>
+            <!-- Used this button to pull soundfonts
+                <button id="reload_soundfonts" onclick="getSoundfonts();">Get Soundfonts</button>
+            -->
+            </div>
+            <div>
+                <p>Increase Decibels before conversion</p>
+                <input id="db_boost" type="number" min="-50" max="50" value="0"/>
+            </div>
+            <div>
+                <button class="btn-dark" id="convert">Convert</button>
+            </div>
+            <div id="mediaParent">
+                <audio controls>
+                    <source id="source" src="" type="audio/ogg">
+                </audio>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="pageScript">
+    window.addEventListener("load", () =>{
+        const canvas = document.querySelector('#mainCanvas');
+        const colorSelect = document.querySelector('#colors');
+        const convert = document.querySelector('#convert');
+
+        canvasPixels = [];
+        for (let i = 0; i < canvas.height; i++){
+            //populating the array
+            row = [];
+            for (let j = 0; j <canvas.width; j++){
+                pixel = [255,255,255];
+                row.push(pixel);
+            }
+            canvasPixels.push(row);
+        }
+        const canvasctx = canvas.getContext('2d');
+        let currentColor = '';
+        let painting = false;
+
+
+        
+
+        function hexToRgb(hex) {
+            //simple hex to rgb by Tim Down on stackoverflow
+            //changes a hex value to its given rgb value using regex
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+
+        function startPosition(e){
+            // enables painting when the mouse is pressed while the cursor is over the canvas
+            painting = true;
+            draw(e);
+        }
+        function endPosition(){
+            // disables painting when the mouse is released while the cursor is over the canvas
+            painting = false;
+            canvasctx.beginPath();
+        }
+        function changeColor(){
+            //changes the color of the brush when the select value is changed
+            currentColor = colorSelect.value;
+        }
+        function draw(e){
+            //draws a "pixel" on the canvas wherever the mouse is when it is pressed down
+            if(!painting) return;
+            let scale = 16;
+            let x = Math.round(e.clientX/scale)-1;
+            let y = Math.round(e.clientY/scale)-1;
+
+            canvasctx.fillStyle = currentColor;
+            colorRGB = hexToRgb(canvasctx.fillStyle);
+            canvasPixels[y][x] = [colorRGB.r, colorRGB.g, colorRGB.b];
+            canvasctx.rect(x,y, 1, 1);
+            canvasctx.fill();
+        }
+
+        function convertTXT(){
+            //converts the picture to a string and sends it to the server where it is converted into an mp3 file
+            //and sent back to the page to be displayed in a playable format
+            finalString = "";
+            for (let i = 0; i < canvasPixels.length; i++){
+                for (let j = 0; j < canvasPixels[0].length; j++){
+                    currentPixel = canvasPixels[i][j];
+                    finalString += "(" + currentPixel[0] + "," +currentPixel[1] + "," + currentPixel[2] + ") ";
+                } 
+                finalString += "\n";
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", '/imagedata/', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function(){
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200){
+                    data="data:audio/ogg;base64,"+String(xhr.response);
+                    var binary= convertDataURIToBinary(data);
+                    var blob=new Blob([binary], {type : 'audio/ogg'});
+                    var blobUrl = URL.createObjectURL(blob);
+
+                    document.getElementById("mediaParent").innerHTML='';
+                    var new_source = document.createElement("source");
+                    new_source.setAttribute('id', 'source');
+                    new_source.setAttribute('src', blobUrl);
+                    new_source.setAttribute('type', "audio/ogg");
+                    new_audio = document.createElement("audio");
+                    new_audio.setAttribute('controls', 'controls');
+                    new_audio.appendChild(new_source);
+                    document.getElementById("mediaParent").appendChild(new_audio);
+                    document.getElementById("convert").disabled = false;
+                    document.getElementById("convert").innerHTML = 'Convert';
+                }
+            }
+
+            let soundfonts_selected = document.querySelectorAll('#soundfont_picker option:checked');
+            let soundfonts = Array.from(soundfonts_selected).map(el => el.value);
+            if (soundfonts?.length < 1) {
+                alert("Please select at least one instrument first!");
+                return;
+            }  
+            var db_number = parseInt(document.getElementById("db_boost").value, 10)
+            xhr.send(JSON.stringify({
+                img_string:finalString, 
+                soundfonts: soundfonts,
+                db_boost: db_number
+            }));
+            document.getElementById("convert").disabled = true;
+            document.getElementById("convert").innerHTML = 'Converting';
+            
+        }
+
+
+        convert.addEventListener("click", convertTXT);
+        colorSelect.addEventListener("change", changeColor);
+        canvas.addEventListener("mousedown", startPosition);
+        canvas.addEventListener("mouseup", endPosition);
+        canvas.addEventListener("mousemove", draw);
+
+        //TESTING 
+
+        //hexToRgb testing
+
+        //yellow = #FFFF00 = rgb(255,255,0)
+        //magenta = #FF00FF = rgb(255,0,255)
+        //eggshell = #F0EAD6 = rgb(240,234,214)
+        let hexToRGBTest = hexToRgb("#FFFF00");
+        if (hexToRGBTest.r != 255 || hexToRGBTest.g != 255 || hexToRGBTest.b != 0){
+            console.log("Test Failed in Hex to RGB test: yellow");
+        }
+        hexToRGBTest = hexToRgb("#FF00FF");
+        if (hexToRGBTest.r != 255 || hexToRGBTest.g != 0 || hexToRGBTest.b != 255){
+            console.log("Test Failed in Hex to RGB test: Magenta ");
+        }
+        hexToRGBTest = hexToRgb("#F0EAD6");
+        if (hexToRGBTest.r != 240 || hexToRGBTest.g != 234 || hexToRGBTest.b != 214){
+            console.log("Test Failed in Hex to RGB test: eggshell");
+        }
+
+    });
+
+    var BASE64_MARKER = ';base64,';
+
+    function convertDataURIToBinary(dataURI) {
+        var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+        var base64 = dataURI.substring(base64Index);
+        var raw = window.atob(base64);
+        var rawLength = raw.length;
+        var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+        for(i = 0; i < rawLength; i++) {
+            array[i] = raw.charCodeAt(i);
+        }
+        return array;
+    }
+
+    function getSoundfonts() {
+        var xhr = new XMLHttpRequest();
+            xhr.open("GET", '/get_soundfonts/', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function(){
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200){
+                    console.log(xhr.response);
+                    let soundfonts = JSON.parse(xhr.response);
+                    document.getElementById("soundfont_picker").innerHTML = '';
+                    for (s in soundfonts) {
+                        var sf = document.createElement("option");
+                        sf.setAttribute('value', soundfonts[s]);
+                        sf.innerHTML=soundfonts[s];
+                        document.getElementById("soundfont_picker").appendChild(sf);
+                    }
+                }
+            }
+            xhr.send();
+    }
+    getSoundfonts();
+
+    document.getElementById("hello_username").innerHTML = 'Hello '+JSON.parse(localStorage.getItem('user')).username+'!';
+</script>
+<style>
+#mainCanvas{
+        outline: 2px solid black;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: pixelated;
+        cursor: crosshair;
+}
+</style>
+</body>
+</html>

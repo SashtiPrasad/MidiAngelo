@@ -1,0 +1,109 @@
+a{
+	color: #91d830;
+}
+
+/* LINK BUTTON ------------------------------------------------------------*/
+
+.link-button{
+	background-image: url(../img/green/sprites.png);
+	color: #1f1f1f;
+}
+	
+.link-button span{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* SEARCH ------------------------------------------------------------*/
+
+form#searchform input#searchsubmit{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* NAV ------------------------------------------------------------*/
+
+#nav li.current_page_item{
+	background-image: url(../img/green/sprites.png);
+}
+
+#nav>li>a{
+	color: #91d830;
+}
+
+#nav li ul{
+	background: #91d830;
+}
+
+#nav li ul li a{
+	color: #ffffff;
+}
+
+/* SLIDESHOW ------------------------------------------------------------*/
+
+#slideshow-nav{
+	background-image: url(../img/green/sprites.png);
+}
+
+#slideshow-nav-holder .nav-left{
+	background-image: url(../img/green/sprites.png);
+}
+
+#slideshow-nav-holder .nav-right{
+	background-image: url(../img/green/sprites.png);
+}
+
+#slideshow-nav a { 
+	background-image: url(../img/green/sprites.png);
+}
+
+#slideshow-nav a:hover{
+	background-image: url(../img/green/sprites.png);
+}
+
+#slideshow-nav a.activeSlide { 
+	background-image: url(../img/green/sprites.png);
+}
+
+/* GALLERY ------------------------------------------------------------*/
+
+.gallery li span{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* GALLERY PAGER ------------------------------------------------------------*/
+
+.gallery-pager li{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* SIDEBAR ------------------------------------------------------------*/
+
+#sidebar li h2{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* COMMENTS ------------------------------------------------------------*/
+
+.comments-header{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* FORMS ------------------------------------------------------------*/
+
+#contactForm #submit,
+#commentform input#submit{
+	background-image: url(../img/green/sprites.png);
+}
+
+/* FOOTER ------------------------------------------------------------*/
+
+#footer .follow-us li:last-child{
+	background-image: url(../img/green/sprites.png);
+}
+
+#footer .follow-us li{
+	background: #91d830;
+}
+
+#footer ul.footer-cols li.col a{
+	color: #91d830;
+}

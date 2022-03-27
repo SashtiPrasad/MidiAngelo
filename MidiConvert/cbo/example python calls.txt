@@ -1,0 +1,39 @@
+midi tempo adjuster takes:
+a string name for the midi file inputted.
+a string name for the newly created midi output.
+a float that is greater than 0 as the factor in which to speed up/ slow down.
+
+example:
+python midi_tempo_adjuster.py 'filein.mid' 'fileout.mid' 0.50
+
+
+midi to audio conversion takes:
+
+a string name representing the soundbank being used for the conversion (i took the liberty of just adding the "soundbanks/" part of the name to the code itself).
+a string name representing the name of the midi file we wish to use with the soundbank.
+a string name representing the name of the outputted .wav file we would like to save the conversion as.
+
+example:
+python midi_to_audio_conversion.py 'Recorder.sf2' 'filein.mid' 'output.wav'
+
+
+audio volume adjuster takes:
+
+a string name representing the .wav file inputted.
+a string name representing the .wav file output after audio adjustment.
+an integer (other than zero). Positive integers will make the .wav louder, while negative integers will make the .wav quieter.
+
+example:
+python audio_volume_adjuster.py 'output.wav' 'output_volume.wav' 25
+
+
+Canvas to midi converion takes:
+
+a string name repressenting the output name of the .midi file
+a string that hold the exported data from the canvas
+
+example for calling from terminal:
+python3 canvas2midi.py outputFileName "(255,255,255) (255,0,0)\n(0,255,0) (0,0,255)\n"
+
+example for calling function in python:
+canvas2midi(outputFileName,"(255,255,255) (255,0,0)\n(0,255,0) (0,0,255)\n")

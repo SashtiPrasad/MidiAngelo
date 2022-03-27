@@ -1,0 +1,110 @@
+a{
+	color: #54a8f9;
+}
+
+/* LINK BUTTON ------------------------------------------------------------*/
+
+.link-button{
+	background-image: url(../img/blue/sprites.png);
+	color: #fff;
+}
+	
+.link-button span{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* SEARCH ------------------------------------------------------------*/
+
+form#searchform input#searchsubmit{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* NAV ------------------------------------------------------------*/
+
+#nav li.current_page_item{
+	background-image: url(../img/blue/sprites.png);
+}
+
+#nav>li>a{
+	color: #54a8f9;
+}
+
+#nav li ul{
+	background: #54a8f9;
+}
+
+#nav li ul li a{
+	color: #ffffff;
+}
+
+/* SLIDESHOW ------------------------------------------------------------*/
+
+#slideshow-nav{
+	background-image: url(../img/blue/sprites.png);
+}
+
+#slideshow-nav-holder .nav-left{
+	background-image: url(../img/blue/sprites.png);
+}
+
+#slideshow-nav-holder .nav-right{
+	background-image: url(../img/blue/sprites.png);
+}
+
+#slideshow-nav a { 
+	background-image: url(../img/blue/sprites.png);
+}
+
+#slideshow-nav a:hover{
+	background-image: url(../img/blue/sprites.png);
+}
+
+#slideshow-nav a.activeSlide { 
+	background-image: url(../img/blue/sprites.png);
+}
+
+
+/* GALLERY ------------------------------------------------------------*/
+
+.gallery li span{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* GALLERY PAGER ------------------------------------------------------------*/
+
+.gallery-pager li{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* SIDEBAR ------------------------------------------------------------*/
+
+#sidebar li h2{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* COMMENTS ------------------------------------------------------------*/
+
+.comments-header{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* FORMS ------------------------------------------------------------*/
+
+#contactForm #submit,
+#commentform input#submit{
+	background-image: url(../img/blue/sprites.png);
+}
+
+/* FOOTER ------------------------------------------------------------*/
+
+#footer .follow-us li:last-child{
+	background-image: url(../img/blue/sprites.png);
+}
+
+#footer .follow-us li{
+	background: #54a8f9;
+}
+
+#footer ul.footer-cols li.col a{
+	color: #54a8f9;
+}

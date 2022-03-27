@@ -1,0 +1,919 @@
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<!--Moment JS and Datepicker-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+	body {margin: 0 30px;}
+	div {font-family: sans-serif;}
+	.row {margin-bottom: 30px;}
+</style>
+<html>
+	<title>SHS Staff</title>
+	<body>
+		<div class="container">  
+			<div class="row" style="margin-top:30px; text-align: center;">
+				<div class="col-6">
+					<h1>Staff Admin</h1>
+				</div>
+				<div class="col-6" style="text-align: right;">	
+					<a href="http://localhost:8001/reports" class="btn btn-primary">Reports</a>
+					<button class="btn btn-warning" onclick="logout()">Logout</button>
+				</div>
+				<div class="col">
+					<button  type="button" class="btn btn-primary" data-toggle="modal" data-target="#newServiceModal">Book Service</button>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newServiceTypeModal">Create Service</button>
+				</div>
+				<div class="col">
+					<button id="createUserBtn" style="display: none;" type="button" data-toggle="modal" data-target="#newUserModal" class="btn btn-primary">Create User</button>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newStaffModal">Create Staff</button>
+				</div>
+				<div class="col">
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newClientModal">Create Client</button>
+				</div>
+			</div>
+			<div class="row" style="text-align: center;">
+				<div class="col-12">
+					<h4 id="message"></h4>
+				</div>
+			</div>  
+			<div class="row">		
+				<div class="col-3">
+					Service Schedule
+				</div>
+				<div class="col-3" style="text-align: right;">	
+					<label>Staff User ID: </label>
+					<input id="search_staff_id" type="numnber" min="0" placeholder="Search">
+				</div>
+				<div class="col-3" style="text-align: right;">
+					<a class="btn btn-success" onclick="getSchedule()">Refresh</a>
+				</div>
+				<div class="col-3">
+					<button class="btn btn-success" onclick="createPDF()">Get PDF</button>
+				</div>
+				<div class="col-12" id="serviceTable">
+					<table class="table table-bordered">	
+						<thead>
+							<th>Date</th>
+							<th>Service</th>
+							<th>Client</th>
+							<th>Staff</th>
+							<th>Actions</th>
+						</thead>
+						<tbody id="serviceBody">
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="row">	
+				<div class="col-6">
+					<h5>Clients</h5>
+				</div>
+				<div class="col-6" style="text-align: right;">
+					<a class="btn btn-success" onclick="getClient()">Refresh</a>
+				</div>
+				<div class="col-12">	
+					<table id="client_table" class="table table-bordered">	
+						<thead>
+							<th>USER ID</th>
+							<th>First Name</th>
+							<th>Last Name</th>
+							<th>Joined</th>
+							<th>Actions</th>
+						</thead>	
+						<tbody id="clientBody">	
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-6">
+					<h5>Staff</h5>
+				</div>
+				<div class="col-6" style="text-align: right;">
+					<a class="btn btn-success" onclick="getStaff()">Refresh</a>
+				</div>
+				<div class="col-12">	
+					<table id="staff_table" class="table table-bordered">	
+						<thead>
+							<th>USER ID</th>
+							<th>First Name</th>
+							<th>Last Name</th>
+							<th>Level</th>
+							<th>Joined</th>
+							<th>Actions</th>
+						</thead>	
+						<tbody id="staffBody">	
+
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+		</div>
+		<!-- Service Modal -->
+		<div class="modal fade" id="newServiceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Book Service</h5>
+					</div>
+					<div class="modal-body">
+						<div class="row">	
+							<label class="col-3">Client User ID<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="service_client_id" type="number" min="1"/>
+							</div>
+							
+						</div>
+						<div class="row">
+							<label class="col-3">Staff User ID<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="service_staff_id" onchange="getServiceTypes();" type="number" min="1"/>
+							</div>
+						</div>
+						<div class="row" id="staff_services">
+							<label class="col-3">Service<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<select id="services">
+									<option value=0>Enter Staff User ID</option>
+								</select>
+							</div>
+						</div>
+						<div class="row">
+							<label class="col-3">Date<span style="color:red;">*</span></label>
+							<div class="col-9 input-group date">
+								<input id="service_start" type="date" class="form-control">
+							</div>
+							<label class="col-3">Time<span style="color:red;">*</span></label>
+							<div class="col-9 input-group time">
+								<input id="service_time" type="time" class="form-control">
+							</div>
+						</div>
+						<div class="col-12"> 
+							<h6 style="padding:20px;" id="new_service_message"></h6>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" onclick="newService();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Staff Modal -->
+		<div class="modal fade" id="newStaffModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">New Staff</h5>
+					</div>
+					<div class="modal-body">
+						<div class="row">	
+							<label class="col-3">User Id</label>
+							<div class="col-9">
+								<input id="new_staff_user_id" type="number" min="0"/>
+							</div>
+						</div>
+						<div class="row">	
+							<label class="col-3">Level of Permission</label>
+							<div class="col-9">
+								<input id="new_staff_level" type="number" min="0"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-12"> 
+						<h6 style="padding:20px;" id="new_staff_message"></h6>
+					</div>
+					<div class="modal-footer">
+						<button type="button" onclick="newStaff();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Client Modal -->
+		<div class="modal fade" id="newClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">New Client</h5>
+					</div>
+					<div class="modal-body">
+						<div class="row">	
+							<h3 class="col-12">Add By</h3>
+							<label class="col-3">User Id</label>
+							<div class="col-9">
+								<input id="new_client_user_id" type="number" min="0"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-12">    
+						<h6 style="padding:20px;" id="new_client_message"></h6>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" onclick="newClient();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Service Types Modal -->
+		<div class="modal fade" id="newServiceTypeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">New Service Type</h5>
+					</div>
+					<div class="modal-body">
+						<div class="row">	
+							<label class="col-3">Name of Service<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="service_name" type="text" maxlength=50/>
+							</div>
+						</div>
+						<div class="row">	
+							<label class="col-3">Level of Staff Needed<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="service_level" type="number" min="0" max="4"/>
+							</div>
+						</div>
+						<div class="row">	
+							<label class="col-3">Avg. Completion Time<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="service_completion" type="number" min="0"/>
+								<label>minutes</label>
+							</div>
+						</div>
+						<div class="">	
+							<div class="col-12">    
+								<h6 style="padding:20px;" id="new_service_type_message"></h6>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" onclick="newServiceType();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Edit Service Modal -->
+		<div class="modal fade" id="editServiceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Edit Service</h5>
+					</div>
+					<div class="modal-body">
+						<input id="edit_service_id" type="hidden" value="0"/>
+						<div class="row">	
+							<label class="col-3">Client User ID<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="edit_service_client_id" type="number" min="1"/>
+							</div>
+							
+						</div>
+						<div class="row">
+							<label class="col-3">Staff User ID<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="edit_service_staff_id" onchange="getServiceTypes(1);" type="number" min="1"/>
+							</div>
+						</div>
+						<div class="row" id="staff_services">
+							<label class="col-3">Service<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<select id="edit_services">
+									<option value=0>Enter Staff User ID</option>
+								</select>
+							</div>
+						</div>
+						<div class="row">	
+							<label class="col-3">Time to Complete:</label>
+							<div class="col-9">
+								<input type="number" min="0" id="time_to_complete" value="0"/>
+								<label>minutes</label>
+							</div>
+						</div>
+						<div class="row">
+							<label class="col-3">Date<span style="color:red;">*</span></label>
+							<div class="col-9 input-group date">
+								<input id="edit_service_start" type="date" class="form-control">
+							</div>
+							<label class="col-3">Time<span style="color:red;">*</span></label>
+							<div class="col-9 input-group time">
+								<input id="edit_service_time" type="time" class="form-control">
+							</div>
+						</div>
+						<div class="col-12"> 
+							<h6 style="padding:20px;" id="edit_service_message"></h6>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" onclick="updateService();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- New User Modal -->
+		<div class="modal fade" id="newUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">New User</h5>
+					</div>
+					<div class="modal-body">
+						<div class="row">	
+							<label class="col-3">First Name<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="first_name" type="text" maxlength=50/>
+							</div>
+						</div>
+						<div class="row">
+							<label class="col-3">Last Name<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<input id="last_name" type="text" maxlength=50/>
+							</div>
+						</div>
+						
+						<div class="row">
+							<label class="col-3">Birthdate</label>
+							<div class="col-9">
+								<input id="birthdate" type="datetime"/>
+							</div>
+							<div class="col-3"></div>
+							<div class="col-9">
+								<label>YYYY-MM-DD</label>
+							</div>
+						</div>
+						
+						<div class="row">
+							<label class="col-3">Sex<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<select id="sex">	
+									<option value="f">Female</option>
+									<option value="m">Male</option>
+								</select>
+							</div>
+						</div>
+						
+						<div class="row">
+							<label class="col-3">Gender<span style="color:red;">*</span></label>
+							<div class="col-9">
+								<select id="gender">
+									<option value="f" selected>Female</option>
+									<option value="m">Male</option>
+									<option value="tm">Transgender Male</option>
+									<option value="tf">Transgender Female</option>
+								</select>
+							</div>
+						</div>
+						
+					</div>
+					<div class="modal-footer">
+						<button type="button" onclick="newUser();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Edit Staff Modal -->
+		<div class="modal fade" id="editStaffModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Edit Staff</h5>
+					</div>
+					<div class="modal-body">
+						<input type="hidden" id="edit_staff_id" value="0" />
+						<div class="row">	
+							<label class="col-3">Level of Permission</label>
+							<div class="col-9">
+								<input id="edit_staff_level" type="number" min="0"/>
+							</div>
+						</div>
+					</div>
+					<div class="col-12"> 
+						<h6 style="padding:20px;" id="edit_staff_message"></h6>
+					</div>
+					<div class="modal-footer">
+						<button type="button" onclick="updateStaff();" class="btn btn-primary">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>
+<script>    
+	let user = JSON.parse(localStorage.getItem('user'));
+	$(document).ready(function(){
+		getClient();
+		getStaff();
+		getSchedule();
+		if ( (user && user.staff && user.staff.level == 4) || !user ) {
+			$("#createUserBtn").show();
+		}
+	});
+
+	function getClient() {
+		$.ajax({
+			url:`http://localhost:8000/api/clients`,
+			method: 'GET',
+			contentType: 'application/json',
+			data: {
+
+			},
+			type: 'JSON',
+			success: function(result) {
+				$("#clientBody").empty();
+				for (client in result) {
+					var actions = ``;
+					if (user.staff && user.staff.level > 2) {
+						actions += `<button class="btn-sm btn-danger" onclick="deleteClient(${result[client].user.id})">Delete</button>`;
+					} 
+					$(`<tr>
+						<td>${result[client].user_id}</td>
+						<td>${result[client].user.first_name}</td>
+						<td>${result[client].user.last_name}</td>
+						<td>${result[client].created}</td>
+						<td style="text-align:center;">${actions}</td>
+					</tr>`).appendTo("#clientBody");
+				}
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Error getting data.`);
+			}
+		})
+	}
+
+	function newClient() {
+		$("#new_client_message").css("color", "blue");
+		if (!$("#new_client_user_id").val()) {
+			$("#new_client_message").css("color", "red");
+			$("#new_client_message").html("You must enter a user id")
+			return;
+		}
+		$.ajax({
+			url:`http://localhost:8000/api/clients`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				user_id: $("#new_client_user_id").val()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				$("#message").css("color", "blue");
+				$("#message").html(`Successfully added!`);
+				getClient();
+			},
+			error: function(result) {
+				$("#role_select").hide();
+				$("#new_client_message").css("color", "red");
+				$("#new_client_message").html(`There was a problem creating the client. Make sure your id is valid and they don't already exist.`);
+			}
+		})
+	}
+
+	function newStaff() {
+		$("#new_staff_message").css("color", "blue");
+		if (!$("#new_staff_user_id").val()) {
+			$("#new_staff_message").css("color", "red");
+			$("#new_staff_message").html("You must enter a user id");
+			return;
+		}
+		$.ajax({
+			url:`http://localhost:8000/api/staffs`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				user_id: $("#new_staff_user_id").val(),
+				level: $("#new_staff_level").val()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				$("#message").css("color", "blue");
+				$("#message").html(`Successfully added!`);
+				getStaff();
+				if (result) {
+					
+				}
+
+			},
+			error: function(result) {
+				$("#role_select").hide();
+				$("#new_staff_message").css("color", "red");
+				$("#new_staff_message").html(`There was a problem creating the staff member.`);
+				$("#new_staff_message").html(`There was a problem creating the staff. Make sure your id is valid and they don't already exist.`);
+			}
+		})
+	}
+
+	function getStaff() {
+		$.ajax({
+			url:`http://localhost:8000/api/staffs`,
+			method: 'GET',
+			contentType: 'application/json',
+			data: {
+
+			},
+			type: 'JSON',
+			success: function(result) {
+				$("#staffBody").empty();
+				for (staff in result) {
+					var actions = ``;
+
+					if (user.staff && user.staff.level > result[staff].level) {
+						actions += `<button class="btn-sm btn-primary" onclick="editStaff(${result[staff].user.id})">Edit</button>`;
+						actions += `<button class="btn-sm btn-danger" onclick="deleteStaff(${result[staff].user.id})">Delete</button>`;
+					} 
+					$(`<tr>
+						<td>${result[staff].user_id}</td>
+						<td>${result[staff].user.first_name}</td>
+						<td>${result[staff].user.last_name}</td>
+						<td>${result[staff].level}</td>
+						<td>${result[staff].created}</td>
+						<td style="text-align:center;">${actions}</td>
+					</tr>`).appendTo("#staffBody");
+				}
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Error getting data.`);
+			}
+		});
+	}
+
+	function getService(id=0) {
+		if (!id) return;
+		$.ajax({
+			url:`http://localhost:8000/api/services/${id}`,
+			method: 'GET',
+			contentType: 'application/json',
+			data: {},
+			type: 'JSON',
+			success: function(result) {
+				//Set modal values for edit service
+				$("#edit_service_id").val(result.id);
+				$("#edit_service_client_id").val(result.service.client_id);
+				$("#edit_service_staff_id").val(result.service.staff_id);
+				$("#time_to_complete").val((result.service.time_to_complete ? result.service.time_to_complete : 0))
+				$("#edit_services").empty();
+				getServiceTypes(1);
+				var date = new Date(result.service.start);
+				var date_str = `${date.getFullYear()}-${date.getMonth()+1}-${(date.getDate()<10 ? "0"+date.getDate() : date.getDate())}`;
+				$("#edit_service_start").val(date_str);
+				var time = `${(date.getHours() < 10 ? "0"+date.getHours() : date.getHours())}:${(date.getMinutes() < 10 ? "0"+date.getMinutes() : date.getMinutes())}`;
+				$("#edit_service_time").val(time);
+				$("#edit_service_message").empty();
+				//Show modal
+				$("#editServiceModal").modal('show');
+				$("#edit_services").val(result.service.service_type_id);
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Error getting data.`);
+			}
+		});
+	}
+
+	function newService() {
+		$("#new_service_message").css("color", "blue");
+		var datetime = new Date($("#service_start").val() + " " + $("#service_time").val())
+
+		if (!$("#service_client_id").val() || !$("#service_staff_id").val() || !$("#services").val()
+			|| ! datetime) {
+			$("#new_service_message").css("color", "red");
+			$("#new_service_message").html("You must enter all fields.");
+			return;
+		}
+
+		$.ajax({
+			url:`http://localhost:8000/api/services`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				client_id: $("#service_client_id").val(),
+				staff_id: $("#service_staff_id").val(),
+				service_type_id: parseInt($("#services").val()),
+				start: datetime.toISOString()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				$("#message").css("color", "blue");
+				$("#message").html(`Successfully added!`);
+				$("#role_select").show();
+			},
+			error: function(result) {
+				$("#role_select").hide();
+				$("#new_service_type_message").css("color", "red");
+				$("#new_service_type_message").html(`There was a problem creating the staff member.`);
+				$("#new_service_type_message").html(`There was a problem creating the staff. Make sure your id is valid and they don't already exist.`);
+			}
+		})
+	}
+
+	function newServiceType() {
+		$("#new_service_type_message").css("color", "blue");
+
+		if (!$("#service_name").val() || !$("#service_level").val() || !$("#service_completion").val()) {
+			$("#new_service_type_message").css("color", "red");
+			$("#new_service_type_message").html("You must enter a user id");
+			return;
+		}
+
+		$.ajax({
+			url:`http://localhost:8000/api/service_types`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				name: $("#service_name").val(),
+				level: $("#service_level").val(),
+				completion_time: $("#service_completion").val()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				console.log(result);
+				$("#message").css("color", "blue");
+				$("#message").html(`Successfully added!`);
+				$("#role_select").show();
+			},
+			error: function(result) {
+				$("#role_select").hide();
+				$("#new_service_type_message").css("color", "red");
+				$("#new_service_type_message").html(`There was a problem creating the staff member.`);
+				$("#new_service_type_message").html(`There was a problem creating the staff. Make sure your id is valid and they don't already exist.`);
+			}
+		})
+	}
+
+	/*
+	Get Services available to the Staff w/ id by level of staff
+	*/
+	function getServiceTypes(is_edit=0) {
+
+		$.ajax({
+			url:`http://localhost:8000/api/service_details/${$("#"+(is_edit ? "edit_" : "")+"service_staff_id").val()}`,
+			method: 'GET',
+			contentType: 'application/json',
+			data: {},
+			type: 'JSON',
+			success: function(result) {
+				$("#new_service_message").css("color", "blue");
+				$("#new_service_message").empty();
+				$("#"+(is_edit ? "edit_" : "")+"services").empty();
+				for (key in result) {
+					$("#"+(is_edit ? "edit_" : "")+"services").append( $("<option>", {
+						value: result[key].id,
+						text: result[key].name
+					}));
+				}
+				if (result.length < 1) {
+					$("#"+(is_edit ? "edit_" : "")+"services").append( $("<option>", {
+						value: 0,
+						text: "Please create a service first"
+					}));
+				}
+			},
+			error: function(result) {
+				$("#role_select").hide();
+				$("#new_service_message").css("color", "red");
+				$("#new_service_message").html(`There was a problem getting the staff's services.`);
+			}
+		})
+	}
+
+	function getSchedule() {
+		var staff_user_id = ($("#search_staff_id").val() ? `/${$("#search_staff_id").val()}` : ``);
+		$.ajax({
+			url:`http://localhost:8000/api/schedule${staff_user_id}`,
+			method: 'GET',
+			contentType: 'application/json',
+			data: {},
+			type: 'JSON',
+			success: function(result) {
+				$("#serviceBody").empty();
+				for (key in result) {
+					$(`<tr>
+						<td>${result[key].start}</td>
+						<td>${result[key].service_type.name}</td>
+						<td>${result[key].client.first_name + " " + result[key].client.last_name}</td>
+						<td>${result[key].staff.first_name + " " + result[key].staff.last_name}</td>
+						<td><button type="button" class="btn-sm btn-primary" onclick="getService(${result[key].id});">Edit</button></td>
+					</tr>`)
+					.appendTo("#serviceBody");
+				}
+				if (result.length < 1) {
+					$("#services").append( $("<option>", {
+						value: 0,
+						text: "Please create a service first"
+					}));
+				}
+			},
+			error: function(result) {
+				$("#role_select").hide();
+				$("#new_service_message").css("color", "red");
+				$("#new_service_message").html(`There was a problem getting the staff's services.`);
+			}
+		})
+	}
+
+	function logout() {
+		localStorage.removeItem("user");
+		window.location.href = "http://localhost:8001";
+	}
+
+	function createPDF() {
+		var sTable = $("#serviceTable").html();
+
+		var style = "<style>";
+		style = style + "table {width: 100%;font: 17px Calibri;}";
+		style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
+		style = style + "padding: 2px 3px;text-align: center;}";
+		style = style + "</style>";
+
+		// CREATE A WINDOW OBJECT.
+		var win = window.open('', '', 'height=700,width=700');
+
+		win.document.write('<html><head>');
+		win.document.write('<title>SHS Staff Schedule</title>');   // <title> FOR PDF HEADER.
+		win.document.write(style);          // ADD STYLE INSIDE THE HEAD TAG.
+		win.document.write('</head>');
+		win.document.write('<body>');
+		win.document.write(sTable);         // THE TABLE CONTENTS INSIDE THE BODY TAG.
+		win.document.write('</body></html>');
+
+		win.document.close(); 	// CLOSE THE CURRENT WINDOW.
+
+		win.print();    // PRINT THE CONTENTS.
+	}
+
+	function updateService() {
+		$("#edit_service_message").css("color", "blue");
+		var datetime = new Date($("#edit_service_start").val() + " " + $("#edit_service_time").val())
+
+		if (!($("#edit_service_id").val()) || !$("#edit_service_client_id").val() || !$("#edit_service_staff_id").val() || !$("#edit_services").val()
+			|| ! datetime) {
+			$("#edit_service_message").css("color", "red");
+			$("#edit_service_message").html("You must enter all fields.");
+			return;
+		}
+
+		$.ajax({
+			url:`http://localhost:8000/api/services/${$("#edit_service_id").val()}`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				client_id: $("#edit_service_client_id").val(),
+				staff_id: $("#edit_service_staff_id").val(),
+				service_type_id: $("#edit_services").val(),
+				start: datetime.toISOString(),
+				time_to_complete: $("#time_to_complete").val()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				$("#editServiceModal").modal('hide');
+				$("#message").html("Service Booking Edited.");
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Error changing booking`);
+			}
+		});
+	}
+
+	function newUser() {
+		$.ajax({
+			url:`http://localhost:8000/api/users`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				first_name: $("#first_name").val(),
+				last_name: $("#last_name").val(),
+				birthdate: ($("#birthdate").val() ? $("#birthdate").val() : null),
+				sex: $("#sex :selected").val(),
+				gender: $("#gender :selected").val()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				$("#staff_console").hide();
+				$("#client_console").hide();
+				$("#message").css("color", "blue");
+				$("#message").html(`${result.user.first_name}'s user number is ${result.user.id}.`);
+				$("#exampleModal").modal('hide');
+			},
+			error: function(result) {
+				$("#staff_console").hide();
+				$("#client_console").hide();
+				$("#message").css("color", "red");
+				$("#message").html(`There was a problem creating your user account.`);
+				$("#exampleModal").modal('hide');
+			}
+		})
+	}
+
+	function deleteClient(client_user_id) {
+		$.ajax({
+			url:`http://localhost:8000/api/clients/${client_user_id}`,
+			method: 'DELETE',
+			contentType: 'application/json',
+			data: {},
+			type: 'JSON',
+			success: function(result) {
+				$("#message").css("color", "blue");
+				$("#message").html(`Staff member deleted.`);
+				getClient();
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Failed to delete staff.`);
+			}
+		})
+	}
+
+	function editStaff(staff_user_id) {
+		$.ajax({
+            url:`http://localhost:8000/api/staffs/${staff_user_id}`,
+            method: 'get',
+            contentType: 'application/json',
+            data: {},
+            type: 'JSON',
+            success: function(result) {
+				$("#edit_staff_id").val(result.user_id);
+				$("#edit_staff_level").val(result.level);
+				$("#editStaffModal").modal('show');
+            },
+            error: function(result) {
+                $("#message").css("color", "red");
+                $("#message").html(`Failed to delete staff.`);
+            }
+        });
+	}
+
+	function updateStaff() {
+		if (
+			!$("#edit_staff_id").val() ||
+			(!$("#edit_staff_level").val() || $("#edit_staff_level").val() >= user.staff.level)
+		) {
+			$("#edit_staff_message").css("color", "red");
+			$("#edit_staff_message").html(`Please enter a permission level lower than yours.`);
+			return;
+		}
+
+		$.ajax({
+			url:`http://localhost:8000/api/staffs/${$("#edit_staff_id").val()}`,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				user_id: $("#edit_staff_id").val(),
+				level: $("#edit_staff_level").val()
+			}),
+			type: 'JSON',
+			success: function(result) {
+				$("#message").css("color", "blue");
+				$("#message").html(`Staff member udpated.`);
+				getStaff();
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Failed to udpate staff.`);
+			}
+		});
+	}
+
+	function deleteStaff(staff_user_id) {
+		$.ajax({
+			url:`http://localhost:8000/api/staffs/${staff_user_id}`,
+			method: 'DELETE',
+			contentType: 'application/json',
+			data: {},
+			type: 'JSON',
+			success: function(result) {
+				$("#message").css("color", "blue");
+				$("#message").html(`Staff member deleted.`);
+				getStaff();
+			},
+			error: function(result) {
+				$("#message").css("color", "red");
+				$("#message").html(`Failed to delete staff.`);
+			}
+		});
+	}
+</script>
